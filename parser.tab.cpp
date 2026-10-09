@@ -125,32 +125,37 @@ enum yysymbol_kind_t
   YYSYMBOL_TOKEN_WHERE = 5,                /* "'WHERE'"  */
   YYSYMBOL_TOKEN_ORDER = 6,                /* "'ORDER'"  */
   YYSYMBOL_TOKEN_BY = 7,                   /* "'BY'"  */
-  YYSYMBOL_TOKEN_LIMIT = 8,                /* "'LIMIT'"  */
-  YYSYMBOL_TOKEN_AND = 9,                  /* "'AND'"  */
-  YYSYMBOL_TOKEN_OR = 10,                  /* "'OR'"  */
-  YYSYMBOL_TOKEN_COMMA = 11,               /* "','"  */
-  YYSYMBOL_TOKEN_SEMICOLON = 12,           /* "';'"  */
-  YYSYMBOL_TOKEN_EQ = 13,                  /* "'='"  */
-  YYSYMBOL_TOKEN_NEQ = 14,                 /* "'!='"  */
-  YYSYMBOL_TOKEN_LT = 15,                  /* "'<'"  */
-  YYSYMBOL_TOKEN_GT = 16,                  /* "'>'"  */
-  YYSYMBOL_TOKEN_LTE = 17,                 /* "'<='"  */
-  YYSYMBOL_TOKEN_GTE = 18,                 /* "'>='"  */
-  YYSYMBOL_TOKEN_IDENTIFIER = 19,          /* "identifier"  */
-  YYSYMBOL_TOKEN_INT = 20,                 /* "integer literal"  */
-  YYSYMBOL_TOKEN_FLOAT = 21,               /* "number literal"  */
-  YYSYMBOL_TOKEN_STRING = 22,              /* "string literal"  */
-  YYSYMBOL_TOKEN_BOOL = 23,                /* "boolean literal"  */
-  YYSYMBOL_TOKEN_INVALID = 24,             /* "invalid character"  */
-  YYSYMBOL_YYACCEPT = 25,                  /* $accept  */
-  YYSYMBOL_query = 26,                     /* query  */
-  YYSYMBOL_column_list = 27,               /* column_list  */
-  YYSYMBOL_opt_where = 28,                 /* opt_where  */
-  YYSYMBOL_opt_order_by = 29,              /* opt_order_by  */
-  YYSYMBOL_opt_limit = 30,                 /* opt_limit  */
-  YYSYMBOL_condition = 31,                 /* condition  */
-  YYSYMBOL_comp_op = 32,                   /* comp_op  */
-  YYSYMBOL_expr = 33                       /* expr  */
+  YYSYMBOL_TOKEN_ASC = 8,                  /* "'ASC'"  */
+  YYSYMBOL_TOKEN_DESC = 9,                 /* "'DESC'"  */
+  YYSYMBOL_TOKEN_LIMIT = 10,               /* "'LIMIT'"  */
+  YYSYMBOL_TOKEN_AND = 11,                 /* "'AND'"  */
+  YYSYMBOL_TOKEN_OR = 12,                  /* "'OR'"  */
+  YYSYMBOL_TOKEN_COMMA = 13,               /* "','"  */
+  YYSYMBOL_TOKEN_SEMICOLON = 14,           /* "';'"  */
+  YYSYMBOL_TOKEN_LPAREN = 15,              /* "'('"  */
+  YYSYMBOL_TOKEN_RPAREN = 16,              /* "')'"  */
+  YYSYMBOL_TOKEN_EQ = 17,                  /* "'='"  */
+  YYSYMBOL_TOKEN_NEQ = 18,                 /* "'!='"  */
+  YYSYMBOL_TOKEN_LT = 19,                  /* "'<'"  */
+  YYSYMBOL_TOKEN_GT = 20,                  /* "'>'"  */
+  YYSYMBOL_TOKEN_LTE = 21,                 /* "'<='"  */
+  YYSYMBOL_TOKEN_GTE = 22,                 /* "'>='"  */
+  YYSYMBOL_TOKEN_IDENTIFIER = 23,          /* "identifier"  */
+  YYSYMBOL_TOKEN_INT = 24,                 /* "integer literal"  */
+  YYSYMBOL_TOKEN_FLOAT = 25,               /* "number literal"  */
+  YYSYMBOL_TOKEN_STRING = 26,              /* "string literal"  */
+  YYSYMBOL_TOKEN_BOOL = 27,                /* "boolean literal"  */
+  YYSYMBOL_TOKEN_INVALID = 28,             /* "invalid character"  */
+  YYSYMBOL_YYACCEPT = 29,                  /* $accept  */
+  YYSYMBOL_query = 30,                     /* query  */
+  YYSYMBOL_column_list = 31,               /* column_list  */
+  YYSYMBOL_opt_where = 32,                 /* opt_where  */
+  YYSYMBOL_opt_order_by = 33,              /* opt_order_by  */
+  YYSYMBOL_opt_asc_desc = 34,              /* opt_asc_desc  */
+  YYSYMBOL_opt_limit = 35,                 /* opt_limit  */
+  YYSYMBOL_condition = 36,                 /* condition  */
+  YYSYMBOL_comp_op = 37,                   /* comp_op  */
+  YYSYMBOL_expr = 38                       /* expr  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -478,19 +483,19 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  5
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   33
+#define YYLAST   42
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  25
+#define YYNTOKENS  29
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  9
+#define YYNNTS  10
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  24
+#define YYNRULES  28
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  39
+#define YYNSTATES  45
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   279
+#define YYMAXUTOK   283
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -531,16 +536,17 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15,    16,    17,    18,    19,    20,    21,    22,    23,    24
+      15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
+      25,    26,    27,    28
 };
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    88,    88,    98,   103,   111,   114,   120,   123,   129,
-     132,   139,   142,   145,   152,   153,   154,   155,   156,   157,
-     161,   165,   169,   173,   177
+       0,    95,    95,   107,   112,   120,   123,   129,   132,   139,
+     142,   145,   151,   154,   161,   164,   167,   170,   177,   178,
+     179,   180,   181,   182,   186,   190,   194,   198,   202
 };
 #endif
 
@@ -558,17 +564,18 @@ yysymbol_name (yysymbol_kind_t yysymbol)
   static const char *const yy_sname[] =
   {
   "end of file", "error", "invalid token", "'SELECT'", "'FROM'",
-  "'WHERE'", "'ORDER'", "'BY'", "'LIMIT'", "'AND'", "'OR'", "','", "';'",
-  "'='", "'!='", "'<'", "'>'", "'<='", "'>='", "identifier",
-  "integer literal", "number literal", "string literal", "boolean literal",
-  "invalid character", "$accept", "query", "column_list", "opt_where",
-  "opt_order_by", "opt_limit", "condition", "comp_op", "expr", YY_NULLPTR
+  "'WHERE'", "'ORDER'", "'BY'", "'ASC'", "'DESC'", "'LIMIT'", "'AND'",
+  "'OR'", "','", "';'", "'('", "')'", "'='", "'!='", "'<'", "'>'", "'<='",
+  "'>='", "identifier", "integer literal", "number literal",
+  "string literal", "boolean literal", "invalid character", "$accept",
+  "query", "column_list", "opt_where", "opt_order_by", "opt_asc_desc",
+  "opt_limit", "condition", "comp_op", "expr", YY_NULLPTR
   };
   return yy_sname[yysymbol];
 }
 #endif
 
-#define YYPACT_NINF (-13)
+#define YYPACT_NINF (-19)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -582,10 +589,11 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      14,    -1,    19,   -13,    -4,   -13,     1,     2,    17,   -13,
-     -11,    18,   -13,   -13,   -13,   -13,   -13,     4,   -12,    16,
-      20,   -11,   -11,   -13,   -13,   -13,   -13,   -13,   -13,   -11,
-       6,     7,    21,   -13,    22,   -13,   -13,   -13,   -13
+      -2,   -18,     7,   -19,     2,   -19,     3,    10,    29,   -19,
+     -15,    30,   -15,   -19,   -19,   -19,   -19,   -19,    -8,    -1,
+      28,    27,    11,   -15,   -15,   -19,   -19,   -19,   -19,   -19,
+     -19,     5,    15,    17,    25,   -19,   -19,    31,   -19,    16,
+     -19,   -19,   -19,   -19,   -19
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -594,21 +602,22 @@ static const yytype_int8 yypact[] =
 static const yytype_int8 yydefact[] =
 {
        0,     0,     0,     3,     0,     1,     0,     0,     5,     4,
-       0,     7,    20,    21,    22,    23,    24,     6,     0,     0,
-       9,     0,     0,    14,    15,    16,    17,    18,    19,     0,
-       0,     0,     0,    11,    12,    13,     8,    10,     2
+       0,     7,     0,    24,    25,    26,    27,    28,     6,     0,
+       0,    12,     0,     0,     0,    18,    19,    20,    21,    22,
+      23,     0,     0,     0,     0,    16,    14,    15,    17,     9,
+      13,     2,    10,    11,     8
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -13,   -13,   -13,   -13,   -13,   -13,    -6,   -13,    -3
+     -19,   -19,   -19,   -19,   -19,   -19,   -19,   -10,   -19,     9
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-       0,     2,     4,    11,    20,    32,    17,    29,    18
+       0,     2,     4,    11,    21,    44,    34,    18,    31,    19
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -616,44 +625,47 @@ static const yytype_int8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-       6,    23,    24,    25,    26,    27,    28,     7,    12,    13,
-      14,    15,    16,    21,    22,    33,    34,     1,     3,     5,
-       8,     9,    10,    30,    19,    36,    35,    37,    31,     0,
-       0,    21,     0,    38
+      12,     1,    22,    23,    24,     3,     6,     5,    13,    14,
+      15,    16,    17,    36,    37,     7,    25,    26,    27,    28,
+      29,    30,    23,    24,    42,    43,     8,    35,    13,    14,
+      15,    16,    17,     9,    10,    32,    20,    33,    39,    41,
+      38,    40,    23
 };
 
 static const yytype_int8 yycheck[] =
 {
-       4,    13,    14,    15,    16,    17,    18,    11,    19,    20,
-      21,    22,    23,     9,    10,    21,    22,     3,    19,     0,
-      19,    19,     5,     7,     6,    19,    29,    20,     8,    -1,
-      -1,     9,    -1,    12
+      15,     3,    12,    11,    12,    23,     4,     0,    23,    24,
+      25,    26,    27,    23,    24,    13,    17,    18,    19,    20,
+      21,    22,    11,    12,     8,     9,    23,    16,    23,    24,
+      25,    26,    27,    23,     5,     7,     6,    10,    23,    14,
+      31,    24,    11
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
    state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,     3,    26,    19,    27,     0,     4,    11,    19,    19,
-       5,    28,    19,    20,    21,    22,    23,    31,    33,     6,
-      29,     9,    10,    13,    14,    15,    16,    17,    18,    32,
-       7,     8,    30,    31,    31,    33,    19,    20,    12
+       0,     3,    30,    23,    31,     0,     4,    13,    23,    23,
+       5,    32,    15,    23,    24,    25,    26,    27,    36,    38,
+       6,    33,    36,    11,    12,    17,    18,    19,    20,    21,
+      22,    37,     7,    10,    35,    16,    36,    36,    38,    23,
+      24,    14,     8,     9,    34
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    25,    26,    27,    27,    28,    28,    29,    29,    30,
-      30,    31,    31,    31,    32,    32,    32,    32,    32,    32,
-      33,    33,    33,    33,    33
+       0,    29,    30,    31,    31,    32,    32,    33,    33,    34,
+      34,    34,    35,    35,    36,    36,    36,    36,    37,    37,
+      37,    37,    37,    37,    38,    38,    38,    38,    38
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
-       0,     2,     8,     1,     3,     0,     2,     0,     3,     0,
-       2,     3,     3,     3,     1,     1,     1,     1,     1,     1,
-       1,     1,     1,     1,     1
+       0,     2,     8,     1,     3,     0,     2,     0,     4,     0,
+       1,     1,     0,     2,     3,     3,     3,     3,     1,     1,
+       1,     1,     1,     1,     1,     1,     1,     1,     1
 };
 
 
@@ -1338,194 +1350,229 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* query: "'SELECT'" column_list "'FROM'" "identifier" opt_where opt_order_by opt_limit "';'"  */
-#line 88 "parser.y"
+#line 95 "parser.y"
                                                                                                           {
-        (yyval.query_val) = new SelectQueryNode(*(yyvsp[-6].str_list_val), (yyvsp[-4].str_val), (yyvsp[-3].expr_val), (yyvsp[-2].str_val) ? (yyvsp[-2].str_val) : "", (yyvsp[-1].int_val));
+        std::string orderCol = (yyvsp[-2].order_by_val) ? (yyvsp[-2].order_by_val)->first : "";
+        bool orderAsc = (yyvsp[-2].order_by_val) ? (yyvsp[-2].order_by_val)->second : true;
+        (yyval.query_val) = new SelectQueryNode(*(yyvsp[-6].str_list_val), (yyvsp[-4].str_val), (yyvsp[-3].expr_val), orderCol, orderAsc, (yyvsp[-1].int_val));
         g_root_ast = (yyval.query_val);
         delete (yyvsp[-6].str_list_val);
         free((yyvsp[-4].str_val));
-        if ((yyvsp[-2].str_val)) free((yyvsp[-2].str_val));
+        if ((yyvsp[-2].order_by_val)) delete (yyvsp[-2].order_by_val);
     }
-#line 1350 "parser.tab.cpp"
+#line 1364 "parser.tab.cpp"
     break;
 
   case 3: /* column_list: "identifier"  */
-#line 98 "parser.y"
+#line 107 "parser.y"
                      {
         (yyval.str_list_val) = new std::vector<std::string>();
         (yyval.str_list_val)->push_back((yyvsp[0].str_val));
         free((yyvsp[0].str_val));
     }
-#line 1360 "parser.tab.cpp"
+#line 1374 "parser.tab.cpp"
     break;
 
   case 4: /* column_list: column_list "','" "identifier"  */
-#line 103 "parser.y"
+#line 112 "parser.y"
                                              {
         (yyvsp[-2].str_list_val)->push_back((yyvsp[0].str_val));
         (yyval.str_list_val) = (yyvsp[-2].str_list_val);
         free((yyvsp[0].str_val));
     }
-#line 1370 "parser.tab.cpp"
+#line 1384 "parser.tab.cpp"
     break;
 
   case 5: /* opt_where: %empty  */
-#line 111 "parser.y"
+#line 120 "parser.y"
                 {
         (yyval.expr_val) = nullptr;
     }
-#line 1378 "parser.tab.cpp"
+#line 1392 "parser.tab.cpp"
     break;
 
   case 6: /* opt_where: "'WHERE'" condition  */
-#line 114 "parser.y"
+#line 123 "parser.y"
                           {
         (yyval.expr_val) = (yyvsp[0].expr_val);
     }
-#line 1386 "parser.tab.cpp"
+#line 1400 "parser.tab.cpp"
     break;
 
   case 7: /* opt_order_by: %empty  */
-#line 120 "parser.y"
-                {
-        (yyval.str_val) = nullptr;
-    }
-#line 1394 "parser.tab.cpp"
-    break;
-
-  case 8: /* opt_order_by: "'ORDER'" "'BY'" "identifier"  */
-#line 123 "parser.y"
-                                          {
-        (yyval.str_val) = (yyvsp[0].str_val);
-    }
-#line 1402 "parser.tab.cpp"
-    break;
-
-  case 9: /* opt_limit: %empty  */
 #line 129 "parser.y"
+                {
+        (yyval.order_by_val) = nullptr;
+    }
+#line 1408 "parser.tab.cpp"
+    break;
+
+  case 8: /* opt_order_by: "'ORDER'" "'BY'" "identifier" opt_asc_desc  */
+#line 132 "parser.y"
+                                                       {
+        (yyval.order_by_val) = new std::pair<std::string, bool>((yyvsp[-1].str_val), (yyvsp[0].int_val) != 0);
+        free((yyvsp[-1].str_val));
+    }
+#line 1417 "parser.tab.cpp"
+    break;
+
+  case 9: /* opt_asc_desc: %empty  */
+#line 139 "parser.y"
+                {
+        (yyval.int_val) = 1; // default ASC
+    }
+#line 1425 "parser.tab.cpp"
+    break;
+
+  case 10: /* opt_asc_desc: "'ASC'"  */
+#line 142 "parser.y"
+              {
+        (yyval.int_val) = 1;
+    }
+#line 1433 "parser.tab.cpp"
+    break;
+
+  case 11: /* opt_asc_desc: "'DESC'"  */
+#line 145 "parser.y"
+               {
+        (yyval.int_val) = 0;
+    }
+#line 1441 "parser.tab.cpp"
+    break;
+
+  case 12: /* opt_limit: %empty  */
+#line 151 "parser.y"
                 {
         (yyval.int_val) = -1;
     }
-#line 1410 "parser.tab.cpp"
+#line 1449 "parser.tab.cpp"
     break;
 
-  case 10: /* opt_limit: "'LIMIT'" "integer literal"  */
-#line 132 "parser.y"
+  case 13: /* opt_limit: "'LIMIT'" "integer literal"  */
+#line 154 "parser.y"
                           {
         (yyval.int_val) = std::stoi((yyvsp[0].str_val));
         free((yyvsp[0].str_val));
     }
-#line 1419 "parser.tab.cpp"
+#line 1458 "parser.tab.cpp"
     break;
 
-  case 11: /* condition: condition "'AND'" condition  */
-#line 139 "parser.y"
+  case 14: /* condition: condition "'AND'" condition  */
+#line 161 "parser.y"
                                   {
         (yyval.expr_val) = new BinaryOpNode("AND", (yyvsp[-2].expr_val), (yyvsp[0].expr_val));
     }
-#line 1427 "parser.tab.cpp"
+#line 1466 "parser.tab.cpp"
     break;
 
-  case 12: /* condition: condition "'OR'" condition  */
-#line 142 "parser.y"
+  case 15: /* condition: condition "'OR'" condition  */
+#line 164 "parser.y"
                                  {
         (yyval.expr_val) = new BinaryOpNode("OR", (yyvsp[-2].expr_val), (yyvsp[0].expr_val));
     }
-#line 1435 "parser.tab.cpp"
+#line 1474 "parser.tab.cpp"
     break;
 
-  case 13: /* condition: expr comp_op expr  */
-#line 145 "parser.y"
+  case 16: /* condition: "'('" condition "')'"  */
+#line 167 "parser.y"
+                                        {
+        (yyval.expr_val) = (yyvsp[-1].expr_val);
+    }
+#line 1482 "parser.tab.cpp"
+    break;
+
+  case 17: /* condition: expr comp_op expr  */
+#line 170 "parser.y"
                       {
         (yyval.expr_val) = new BinaryOpNode((yyvsp[-1].str_val), (yyvsp[-2].expr_val), (yyvsp[0].expr_val));
         free((yyvsp[-1].str_val));
     }
-#line 1444 "parser.tab.cpp"
+#line 1491 "parser.tab.cpp"
     break;
 
-  case 14: /* comp_op: "'='"  */
-#line 152 "parser.y"
+  case 18: /* comp_op: "'='"  */
+#line 177 "parser.y"
               { (yyval.str_val) = strdup("="); }
-#line 1450 "parser.tab.cpp"
+#line 1497 "parser.tab.cpp"
     break;
 
-  case 15: /* comp_op: "'!='"  */
-#line 153 "parser.y"
+  case 19: /* comp_op: "'!='"  */
+#line 178 "parser.y"
               { (yyval.str_val) = strdup("!="); }
-#line 1456 "parser.tab.cpp"
+#line 1503 "parser.tab.cpp"
     break;
 
-  case 16: /* comp_op: "'<'"  */
-#line 154 "parser.y"
+  case 20: /* comp_op: "'<'"  */
+#line 179 "parser.y"
               { (yyval.str_val) = strdup("<"); }
-#line 1462 "parser.tab.cpp"
+#line 1509 "parser.tab.cpp"
     break;
 
-  case 17: /* comp_op: "'>'"  */
-#line 155 "parser.y"
+  case 21: /* comp_op: "'>'"  */
+#line 180 "parser.y"
               { (yyval.str_val) = strdup(">"); }
-#line 1468 "parser.tab.cpp"
+#line 1515 "parser.tab.cpp"
     break;
 
-  case 18: /* comp_op: "'<='"  */
-#line 156 "parser.y"
+  case 22: /* comp_op: "'<='"  */
+#line 181 "parser.y"
               { (yyval.str_val) = strdup("<="); }
-#line 1474 "parser.tab.cpp"
+#line 1521 "parser.tab.cpp"
     break;
 
-  case 19: /* comp_op: "'>='"  */
-#line 157 "parser.y"
+  case 23: /* comp_op: "'>='"  */
+#line 182 "parser.y"
               { (yyval.str_val) = strdup(">="); }
-#line 1480 "parser.tab.cpp"
+#line 1527 "parser.tab.cpp"
     break;
 
-  case 20: /* expr: "identifier"  */
-#line 161 "parser.y"
+  case 24: /* expr: "identifier"  */
+#line 186 "parser.y"
                      {
         (yyval.expr_val) = new ColumnRefNode((yyvsp[0].str_val));
         free((yyvsp[0].str_val));
     }
-#line 1489 "parser.tab.cpp"
+#line 1536 "parser.tab.cpp"
     break;
 
-  case 21: /* expr: "integer literal"  */
-#line 165 "parser.y"
+  case 25: /* expr: "integer literal"  */
+#line 190 "parser.y"
               {
         (yyval.expr_val) = new LiteralNode((yyvsp[0].str_val), "INT");
         free((yyvsp[0].str_val));
     }
-#line 1498 "parser.tab.cpp"
+#line 1545 "parser.tab.cpp"
     break;
 
-  case 22: /* expr: "number literal"  */
-#line 169 "parser.y"
+  case 26: /* expr: "number literal"  */
+#line 194 "parser.y"
                 {
         (yyval.expr_val) = new LiteralNode((yyvsp[0].str_val), "FLOAT");
         free((yyvsp[0].str_val));
     }
-#line 1507 "parser.tab.cpp"
+#line 1554 "parser.tab.cpp"
     break;
 
-  case 23: /* expr: "string literal"  */
-#line 173 "parser.y"
+  case 27: /* expr: "string literal"  */
+#line 198 "parser.y"
                  {
         (yyval.expr_val) = new LiteralNode((yyvsp[0].str_val), "STRING");
         free((yyvsp[0].str_val));
     }
-#line 1516 "parser.tab.cpp"
+#line 1563 "parser.tab.cpp"
     break;
 
-  case 24: /* expr: "boolean literal"  */
-#line 177 "parser.y"
+  case 28: /* expr: "boolean literal"  */
+#line 202 "parser.y"
                {
         (yyval.expr_val) = new LiteralNode((yyvsp[0].str_val), "BOOLEAN");
         free((yyvsp[0].str_val));
     }
-#line 1525 "parser.tab.cpp"
+#line 1572 "parser.tab.cpp"
     break;
 
 
-#line 1529 "parser.tab.cpp"
+#line 1576 "parser.tab.cpp"
 
       default: break;
     }
@@ -1749,7 +1796,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 183 "parser.y"
+#line 208 "parser.y"
 
 
 bool g_syntax_error = false;
@@ -1765,5 +1812,19 @@ void yyerror(const char* s) {
     if (msg.rfind("syntax error, ", 0) == 0) {
         msg = msg.substr(14); // Remove redundant prefix
     }
-    g_syntax_error_msg = "At line " + std::to_string(yylineno) + ": " + msg;
+    size_t unexpPos = msg.find("unexpected ");
+    size_t expPos = msg.find(", expecting ");
+    if (unexpPos != std::string::npos && expPos != std::string::npos) {
+        std::string unexp = msg.substr(unexpPos + 11, expPos - (unexpPos + 11));
+        std::string exp = msg.substr(expPos + 12);
+        if (unexp.size() >= 2 && unexp.front() == '\'' && unexp.back() == '\'') {
+            unexp = unexp.substr(1, unexp.size() - 2);
+        }
+        if (exp == "identifier") {
+            exp = "column identifier";
+        }
+        g_syntax_error_msg = "Unexpected token " + unexp + ". Expected " + exp + ".";
+    } else {
+        g_syntax_error_msg = "At line " + std::to_string(yylineno) + ": " + msg + ".";
+    }
 }

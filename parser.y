@@ -25,6 +25,7 @@ extern bool g_syntax_error;
 %code requires {
     #include <string>
     #include <vector>
+    #include <utility>
     #include "ast.h"
 }
 
@@ -34,6 +35,7 @@ extern bool g_syntax_error;
     ExprNode* expr_val;
     std::vector<std::string>* str_list_val;
     SelectQueryNode* query_val;
+    std::pair<std::string, bool>* order_by_val;
 }
 
 /* Keywords */
@@ -42,6 +44,8 @@ extern bool g_syntax_error;
 %token TOKEN_WHERE "'WHERE'"
 %token TOKEN_ORDER "'ORDER'"
 %token TOKEN_BY "'BY'"
+%token TOKEN_ASC "'ASC'"
+%token TOKEN_DESC "'DESC'"
 %token TOKEN_LIMIT "'LIMIT'"
 %token TOKEN_AND "'AND'"
 %token TOKEN_OR "'OR'"
@@ -49,6 +53,8 @@ extern bool g_syntax_error;
 /* Punctuation */
 %token TOKEN_COMMA "','"
 %token TOKEN_SEMICOLON "';'"
+%token TOKEN_LPAREN "'('"
+%token TOKEN_RPAREN "')'"
 
 /* Comparison Operators */
 %token TOKEN_EQ "'='"
@@ -72,8 +78,9 @@ extern bool g_syntax_error;
 %type <query_val> query
 %type <str_list_val> column_list
 %type <expr_val> opt_where condition expr
-%type <str_val> opt_order_by comp_op
-%type <int_val> opt_limit
+%type <order_by_val> opt_order_by
+%type <int_val> opt_limit opt_asc_desc
+%type <str_val> comp_op
 
 /* Operator Precedence (lowest to highest) */
 %left TOKEN_OR
@@ -86,11 +93,13 @@ extern bool g_syntax_error;
 
 query:
     TOKEN_SELECT column_list TOKEN_FROM TOKEN_IDENTIFIER opt_where opt_order_by opt_limit TOKEN_SEMICOLON {
-        $$ = new SelectQueryNode(*$2, $4, $5, $6 ? $6 : "", $7);
+        std::string orderCol = $6 ? $6->first : "";
+        bool orderAsc = $6 ? $6->second : true;
+        $$ = new SelectQueryNode(*$2, $4, $5, orderCol, orderAsc, $7);
         g_root_ast = $$;
         delete $2;
         free($4);
-        if ($6) free($6);
+        if ($6) delete $6;
     }
 ;
 
@@ -120,8 +129,21 @@ opt_order_by:
     /* empty */ {
         $$ = nullptr;
     }
-  | TOKEN_ORDER TOKEN_BY TOKEN_IDENTIFIER {
-        $$ = $3;
+  | TOKEN_ORDER TOKEN_BY TOKEN_IDENTIFIER opt_asc_desc {
+        $$ = new std::pair<std::string, bool>($3, $4 != 0);
+        free($3);
+    }
+;
+
+opt_asc_desc:
+    /* empty */ {
+        $$ = 1; // default ASC
+    }
+  | TOKEN_ASC {
+        $$ = 1;
+    }
+  | TOKEN_DESC {
+        $$ = 0;
     }
 ;
 
@@ -141,6 +163,9 @@ condition:
     }
   | condition TOKEN_OR condition {
         $$ = new BinaryOpNode("OR", $1, $3);
+    }
+  | TOKEN_LPAREN condition TOKEN_RPAREN {
+        $$ = $2;
     }
   | expr comp_op expr {
         $$ = new BinaryOpNode($2, $1, $3);
@@ -195,5 +220,19 @@ void yyerror(const char* s) {
     if (msg.rfind("syntax error, ", 0) == 0) {
         msg = msg.substr(14); // Remove redundant prefix
     }
-    g_syntax_error_msg = "At line " + std::to_string(yylineno) + ": " + msg;
+    size_t unexpPos = msg.find("unexpected ");
+    size_t expPos = msg.find(", expecting ");
+    if (unexpPos != std::string::npos && expPos != std::string::npos) {
+        std::string unexp = msg.substr(unexpPos + 11, expPos - (unexpPos + 11));
+        std::string exp = msg.substr(expPos + 12);
+        if (unexp.size() >= 2 && unexp.front() == '\'' && unexp.back() == '\'') {
+            unexp = unexp.substr(1, unexp.size() - 2);
+        }
+        if (exp == "identifier") {
+            exp = "column identifier";
+        }
+        g_syntax_error_msg = "Unexpected token " + unexp + ". Expected " + exp + ".";
+    } else {
+        g_syntax_error_msg = "At line " + std::to_string(yylineno) + ": " + msg + ".";
+    }
 }

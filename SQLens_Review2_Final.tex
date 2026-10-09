@@ -1,0 +1,556 @@
+\documentclass[aspectratio=169,10pt]{beamer}
+
+% Academic Monochrome / Plain White Theme
+\usetheme{default}
+\usecolortheme{dove}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}{
+    \hbox{%
+    \begin{beamercolorbox}[wd=.8\paperwidth,ht=2.5ex,dp=1ex,left]{author in head/foot}%
+        \hspace*{1.5em}\scriptsize SQLens: Educational SQL Compiler $|$ BCSE307P Review 2
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.2\paperwidth,ht=2.5ex,dp=1ex,right]{date in head/foot}%
+        \scriptsize \insertframenumber{} / \inserttotalframenumber\hspace*{1.5em}
+    \end{beamercolorbox}}%
+    \vskip0pt%
+}
+
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows.meta,positioning}
+
+\title{\textbf{SQLens: An Educational SQL Compiler and Query Analysis Visualizer}}
+\subtitle{Compiler Design Laboratory (BCSE307P) --- Review 2: Implementation Progress Review}
+\author{\textbf{Mishti Parikshit Gandhi} (Reg. No. 24BCE0881)\\Laboratory Slot: L49 + L50\\[1ex]Faculty Reviewer: \textbf{[Faculty Name / Reviewer]}}
+\institute{School of Computer Science and Engineering (SCOPE)\\Vellore Institute of Technology, Vellore}
+\date{October 2026}
+
+\begin{document}
+
+% Slide 1: Title
+\begin{frame}[plain]
+    \titlepage
+    \note{Good morning respected faculty evaluator. I am Mishti Parikshit Gandhi, registration number 24BCE0881, presenting Review 2 for my Compiler Design Laboratory project titled SQLens.}
+\end{frame}
+
+% Slide 2: Project Overview
+\begin{frame}{Project Overview: Concept, Purpose \& Current Status}
+    \begin{columns}[T]
+        \begin{column}{0.48\textwidth}
+            \textbf{What is SQLens \& What Does It Do?}
+            \begin{itemize}\small
+                \item \textbf{Domain-Specific Compiler:} Educational SQL compiler built in C++ (Flex, Bison) for a declarative MiniSQL language.
+                \item \textbf{Bridging Core Fields:} Connects Compiler Design (lexing, LALR parsing, ASTs, type checks) with DBMS (relational algebra, optimization, CSV scans).
+                \item \textbf{End-to-End Transparency:} Opens the internal pipeline into 10 observable compilation stages.
+                \item \textbf{Zero Mock Data:} All outputs and trees are generated directly by \texttt{minisql.exe}.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.48\textwidth}
+            \textbf{Review 2 Implementation Status}
+            \begin{itemize}\small
+                \item \textbf{Phase 1 Frontend (100\%):} Lexer (Flex), Parser (Bison), AST, Symbol Table, and Semantic Analyzer verified.
+                \item \textbf{Phase 2 Backend (100\%):} Relational IR, Rule-based Optimizer, and in-memory CSV Execution Engine verified.
+                \item \textbf{Automated Test Suite (100\%):} 26/26 automated unit and integration tests passing.
+                \item \textbf{Web Visualizer (~80\%):} React 18 + Node.js API bridge with animated stepper and stage inspector.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+    \note{SQLens exposes all 10 stages of query compilation. Traditional compilers are treated as black boxes. For Review 2, our entire C++ frontend and backend are 100\% complete and tested.}
+\end{frame}
+
+% Slide 3: Revised Problem Statement
+\begin{frame}{Revised Problem Statement \& Pedagogical Need}
+    \textbf{The Pedagogical Problem in Traditional Instruction:}
+    \begin{itemize}\small
+        \item Compiler courses focus on imperative languages (C, Java), leaving database query engines as opaque black boxes.
+        \item DBMS courses teach relational algebra and physical plans theoretically without showing compiler frontend transformations.
+        \item Monolithic industrial toolchains (GCC, LLVM) prevent students from inspecting intermediate representations and stage diagnostics.
+    \end{itemize}
+    \vspace{0.8em}
+    \textbf{Formal Problem Statement for Review 2:}
+    \begin{quote}\small\itshape
+        “Compiler Design concepts can be difficult for students to understand because the internal transformations performed during compilation are not always visible. SQLens addresses this problem by implementing a lightweight MiniSQL compiler and exposing its query-processing pipeline through an interactive visual interface. It enables learners to inspect tokens, syntax structures, semantic analysis, intermediate representation, optimization, execution, and errors through one integrated workflow.”
+    \end{quote}
+    \note{Our revised problem statement addresses the disconnect between theoretical compiler design and visible database execution.}
+\end{frame}
+
+% Slide 4: Objectives
+\begin{frame}{Project Objectives \& Scope of Implementation}
+    \begin{enumerate}\small
+        \item \textbf{Lexical \& Syntax Parsing:} Implement a formal MiniSQL scanner with Flex and an LALR(1) context-free grammar with Bison to parse declarative queries and establish operator precedence.
+        \item \textbf{AST \& Symbol Catalog:} Construct a strongly-typed Abstract Syntax Tree and maintain an in-memory catalog schema verifying relation names, attribute existence, and column types.
+        \item \textbf{Semantic Validation:} Implement strict semantic analysis enforcing table resolution, column scoping, operator type-compatibility, and boolean predicate validation.
+        \item \textbf{Relational Intermediate Code:} Translate validated ASTs into canonical Relational Algebra Intermediate Representation (IR) trees comprising Scan, Filter, Project, Sort, and Limit operators.
+        \item \textbf{Rule-Based Query Optimization:} Implement algebraic query transformations including Filter Pushdown, Late Projection (projection reordering), and Limit Early-Stopping.
+        \item \textbf{CSV Execution \& Fail-Stop Errors:} Execute physical relational plans against CSV datasets and enforce fail-stop error isolation to halt execution at the exact stage of failure.
+    \end{enumerate}
+    \note{These 6 measurable objectives are directly implemented in our C++ codebase and validated by our test harness.}
+\end{frame}
+
+% Slide 5: Scope and Limitations
+\begin{frame}{Scope \& Limitations: Supported Syntax vs Out-of-Scope}
+    \begin{columns}[T]
+        \begin{column}{0.48\textwidth}
+            \textbf{Supported MiniSQL Language (Verified in Code)}
+            \begin{itemize}\footnotesize
+                \item \textbf{Statements:} Declarative \texttt{SELECT ... FROM ... [WHERE ...] [ORDER BY ...] [LIMIT ...]};
+                \item \textbf{Relations:} Single catalog table \texttt{students} (\texttt{id}, \texttt{name}, \texttt{cgpa}, \texttt{age}).
+                \item \textbf{Projections:} Single/multiple comma-separated columns.
+                \item \textbf{Predicates:} Comparisons (\texttt{=}, \texttt{!=}, \texttt{<}, \texttt{>}, \texttt{<=}, \texttt{>=}), logical \texttt{AND}, \texttt{OR}, and parenthesized expressions.
+                \item \textbf{Ordering \& Limits:} \texttt{ORDER BY} [ASC$|$DESC] (including unprojected sort keys), \texttt{LIMIT <int>}.
+                \item \textbf{Storage:} Sequential streaming CSV parsing.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.48\textwidth}
+            \textbf{Explicitly Out-of-Scope / Phase 3 Planned}
+            \begin{itemize}\footnotesize
+                \item \textbf{Multi-Table Operations:} Joins (\texttt{INNER JOIN}, \texttt{CROSS JOIN}) reserved for Phase 3.
+                \item \textbf{Aggregations:} \texttt{COUNT()}, \texttt{SUM()}, \texttt{AVG()}, \texttt{GROUP BY}, and \texttt{HAVING} are excluded.
+                \item \textbf{DML / DDL:} \texttt{INSERT}, \texttt{UPDATE}, \texttt{DELETE}, \texttt{CREATE TABLE} excluded (focus is strictly on query compilation).
+                \item \textbf{Nested Queries:} Subqueries in \texttt{WHERE} or \texttt{FROM}.
+                \item \textbf{Dynamic Schemas:} Arbitrary user-uploaded schemas.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+    \note{We maintain academic integrity by clearly defining our boundaries: MiniSQL focuses deeply on complete compiler transparency over single relations.}
+\end{frame}
+
+% Slide 6: Overall System Architecture
+\begin{frame}{Overall System Architecture \& Component Flow}
+    \begin{columns}[T]
+        \begin{column}{0.32\textwidth}
+            \textbf{1. Web Interface Layer}
+            \begin{itemize}\footnotesize
+                \item React 18 + Vite (Port 5173).
+                \item Express API Bridge (Port 3001).
+                \item ChildProcess CLI execution of \texttt{minisql.exe --json}.
+                \item Pure structured JSON response.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.35\textwidth}
+            \textbf{2. 10-Stage C++ Compiler}
+            \begin{itemize}\footnotesize
+                \item [01] Source Query Validation
+                \item [02] Flex Lexical Scanner
+                \item [03] Bison LALR(1) Parser
+                \item [04] Typed AST Construction
+                \item [05] Symbol Table Catalog
+                \item [06] Semantic Type Checker
+                \item [07] Relational IR Operator Tree
+                \item [08] Rule-Based Optimizer
+                \item [09] CSV Streaming Executor
+                \item [10] Query Results \& Traces
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.30\textwidth}
+            \textbf{3. Storage \& Diagnostics}
+            \begin{itemize}\footnotesize
+                \item Data: \texttt{data/students.csv}.
+                \item In-memory typed evaluation.
+                \item Strict fail-stop error isolation.
+                \item Nanosecond stage profiling.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+    \note{The system architecture has 3 clean tiers: the React/Node visualizer, our 10-stage native C++ compiler pipeline, and physical CSV storage.}
+\end{frame}
+
+% Slide 7: Lexical and Syntax Analysis
+\begin{frame}{Frontend Compilation: Lexical Scanning \& Syntax Parsing}
+    \begin{columns}[T]
+        \begin{column}{0.48\textwidth}
+            \textbf{Lexical Analysis: Flex (\texttt{lexer.l})}
+            \begin{itemize}\footnotesize
+                \item Scans character stream using DFA regular expressions.
+                \item Emits \texttt{TokenRecord}: token name, original lexeme, token classification, line number.
+                \item Catches illegal characters (e.g. \texttt{@}, \texttt{\$}) via fallback rules, triggering immediate fail-stop termination.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.48\textwidth}
+            \textbf{Syntax Analysis: Bison (\texttt{parser.y})}
+            \begin{itemize}\footnotesize
+                \item LALR(1) context-free grammar with explicit operator precedence (\texttt{\%left OR}, \texttt{\%left AND}, \texttt{\%left comp\_ops}).
+                \item Semantic actions build AST nodes bottom-up.
+                \item Enabled \texttt{\%define parse.error detailed} for descriptive syntax error reports.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+    \vspace{0.8em}
+    \textbf{Real Token Stream Example:} \texttt{SELECT name, cgpa FROM students WHERE cgpa > 8.0;}
+    \begin{block}{}\footnotesize
+        \texttt{[SELECT, KEYWORD] $\to$ [IDENTIFIER(name)] $\to$ [COMMA] $\to$ [IDENTIFIER(cgpa)] $\to$ [FROM, KEYWORD] $\to$ [IDENTIFIER(students)] $\to$ [WHERE, KEYWORD] $\to$ [IDENTIFIER(cgpa)] $\to$ [GREATER, >] $\to$ [FLOAT\_LITERAL(8.0)] $\to$ [SEMICOLON]}
+    \end{block}
+    \note{Flex tokenizes input into structured records, and Bison enforces operator precedence and constructs AST nodes during reduction.}
+\end{frame}
+
+% Slide 8: AST and Semantic Analysis
+\begin{frame}{Frontend Compilation: AST Hierarchy \& Semantic Validation}
+    \begin{columns}[T]
+        \begin{column}{0.48\textwidth}
+            \textbf{Abstract Syntax Tree (\texttt{ast.h}, \texttt{ast.cpp})}
+            \begin{itemize}\footnotesize
+                \item Base \texttt{ASTNode} with derived \texttt{SelectQueryNode} and \texttt{ExprNode} hierarchy.
+                \item Decouples semantic query structure from parsing grammar and surface punctuation.
+                \item Implements recursive ASCII tree rendering and JSON serialization.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.48\textwidth}
+            \textbf{Symbol Table \& Semantic Analysis}
+            \begin{itemize}\footnotesize
+                \item Catalog schema for \texttt{students}: \texttt{id} (INT), \texttt{name} (STRING), \texttt{cgpa} (FLOAT), \texttt{age} (INT).
+                \item 6-Point Verification: (1) Table existence, (2) SELECT columns, (3) WHERE columns, (4) ORDER BY columns, (5) Operator type compatibility, (6) Boolean predicate evaluation.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+    \vspace{0.6em}
+    \textbf{Semantic Verification Examples (Verified in Code):}
+    \begin{itemize}\footnotesize
+        \item \textbf{Valid Query:} \texttt{SELECT name, cgpa FROM students WHERE cgpa > 8.0;} $\to$ \textbf{PASS}
+        \item \textbf{Unknown Column:} \texttt{SELECT salary FROM students;} $\to$ \textbf{FAIL (Stage 06)}: Column 'salary' does not exist.
+        \item \textbf{Type Mismatch:} \texttt{SELECT name FROM students WHERE cgpa > 'Alice';} $\to$ \textbf{FAIL (Stage 06)}: Incompatible operand types.
+    \end{itemize}
+    \note{The semantic analyzer verifies attribute existence and enforces strict type safety before intermediate code generation.}
+\end{frame}
+
+% Slide 9: Intermediate Representation
+\begin{frame}{Intermediate Representation: Relational Algebra Trees}
+    \begin{columns}[T]
+        \begin{column}{0.5\textwidth}
+            \textbf{Why Relational Algebra IR? (\texttt{ir.h}, \texttt{ir.cpp})}
+            \begin{itemize}\footnotesize
+                \item AST models surface syntax; Relational IR models relational algebra operators independent of physical execution.
+                \item Canonical plan is constructed systematically from the validated AST.
+                \item Provides the formal foundation for algebraic query rewrites.
+            \end{itemize}
+            \textbf{Implemented Operator Nodes:}
+            \begin{itemize}\footnotesize
+                \item \textbf{ScanNode:} Streams base tuples from storage.
+                \item \textbf{FilterNode:} Evaluates predicate ($\sigma_p$) per tuple.
+                \item \textbf{SortNode:} Orders tuples by key column ($\tau$).
+                \item \textbf{ProjectNode:} Restricts tuple width ($\pi_A$).
+                \item \textbf{LimitNode:} Enforces maximum tuple cardinality.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.46\textwidth}
+            \textbf{Canonical Plan for Test Query:}
+            \begin{block}{}\footnotesize\ttfamily
+                Query: SELECT name, cgpa FROM students WHERE cgpa > 8.0 ORDER BY cgpa LIMIT 3;
+            \end{block}
+            \begin{center}\footnotesize
+            \begin{tabular}{|l|}
+                \hline
+                $\blacktriangledown$ \textbf{LIMIT (3)} --- Caps row count \\
+                $\blacktriangledown$ \textbf{PROJECT [name, cgpa]} --- Restricts columns \\
+                $\blacktriangledown$ \textbf{SORT [cgpa ASC]} --- Orders tuples \\
+                $\blacktriangledown$ \textbf{FILTER [cgpa > 8.0]} --- Predicate evaluation \\
+                $\blacktriangledown$ \textbf{SCAN [students]} --- Sequential table scan \\
+                \hline
+            \end{tabular}
+            \end{center}
+        \end{column}
+    \end{columns}
+    \note{Unlike general compilers which emit Three-Address Code, a query compiler translates ASTs into Relational Algebra Trees.}
+\end{frame}
+
+% Slide 10: Query Optimization
+\begin{frame}{Query Optimization: Rule-Based Algebraic Rewrites}
+    \textbf{Implemented Algebraic Rules (\texttt{optimizer.h}, \texttt{optimizer.cpp}):}
+    \begin{itemize}\footnotesize
+        \item \textbf{Rule 1 --- Filter Pushdown ($\sigma_p(\pi_A(R)) \to \pi_A(\sigma_p(R))$):} Evaluates filters directly adjacent to scans. If already adjacent, optimizer flags \texttt{NOT REQUIRED}.
+        \item \textbf{Rule 2 --- Late Projection (Projection Reordering):} In canonical plans, PROJECT occurs before SORT. If \texttt{ORDER BY} references a column not in \texttt{SELECT}, early projection deletes the sort key! The optimizer pushes PROJECT above SORT to preserve the sort key.
+        \item \textbf{Rule 3 --- Limit Early-Stopping:} When no sort is present, pushes LIMIT into the CSV scan to halt file I/O after $N$ qualifying rows.
+    \end{itemize}
+    \vspace{0.5em}
+    \begin{columns}[T]
+        \begin{column}{0.48\textwidth}
+            \textbf{Canonical Plan (Before Rewrite)}
+            \begin{block}{}\footnotesize\ttfamily
+                LIMIT (3)\\
+                $\to$ SORT (cgpa ASC) [Needs cgpa]\\
+                $\to$ PROJECT [name, age] [Strips cgpa!]\\
+                $\to$ FILTER (age >= 20)\\
+                $\to$ SCAN (students)
+            \end{block}
+        \end{column}
+        \begin{column}{0.48\textwidth}
+            \textbf{Optimized Plan (After Late Projection)}
+            \begin{block}{}\footnotesize\ttfamily
+                LIMIT (3)\\
+                $\to$ PROJECT [name, age] [Pushed Above Sort!]\\
+                $\to$ SORT (cgpa ASC) [cgpa Retained Safely!]\\
+                $\to$ FILTER (age >= 20)\\
+                $\to$ SCAN (students)
+            \end{block}
+        \end{column}
+    \end{columns}
+    \note{Late projection prevents query failure when sorting by unselected attributes, reordering projection safely above sort.}
+\end{frame}
+
+% Slide 11: Query Execution
+\begin{frame}{Physical Query Execution Engine \& CSV Storage}
+    \begin{columns}[T]
+        \begin{column}{0.48\textwidth}
+            \textbf{Execution Pipeline (\texttt{executor.cpp})}
+            \begin{itemize}\footnotesize
+                \item \textbf{CSV Streaming:} Reads \texttt{data/students.csv} row-by-row, validating schema headers.
+                \item \textbf{Type Deserialization:} Parses text fields into runtime variants (int, float, string).
+                \item \textbf{Expression Evaluator:} Dynamically evaluates boolean AST expressions.
+                \item \textbf{In-Memory Quicksort:} Orders tuples according to key column and sort direction.
+                \item \textbf{Projection \& Limit:} Prunes unwanted attributes and caps row output.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.48\textwidth}
+            \textbf{Trace for: \texttt{SELECT name, age FROM students WHERE age >= 20 ORDER BY cgpa LIMIT 3;}}
+            \begin{block}{Physical Trace}\footnotesize
+                SCAN students $\to$ 5 rows loaded\\
+                FILTER age >= 20 $\to$ 3 rows pass (Alice, Bob, David)\\
+                SORT by cgpa ASC $\to$ David (6.9), Bob (7.8), Alice (8.5)\\
+                PROJECT [name, age] $\to$ 2 columns retained\\
+                LIMIT 3 $\to$ 3 tuples emitted
+            \end{block}
+            \textbf{Emitted Result Set:}
+            \begin{itemize}\footnotesize
+                \item Row 1: \texttt{David, 22}
+                \item Row 2: \texttt{Bob, 21}
+                \item Row 3: \texttt{Alice, 20}
+            \end{itemize}
+        \end{column}
+    \end{columns}
+    \note{Our executor performs in-memory evaluation over CSV records, with step-by-step row logging and nanosecond profiling.}
+\end{frame}
+
+% Slide 12: Error Handling
+\begin{frame}{Stage-Specific Error Handling \& Fail-Stop Isolation}
+    \textbf{Core Educational Principle:} Pipeline halts at the exact originating phase; later phases are never invoked.
+    \vspace{0.5em}
+    \begin{table}\footnotesize
+    \begin{tabularx}{\textwidth}{l p{2.2cm} p{4.2cm} X}
+        \toprule
+        \textbf{Error Class} & \textbf{Stage} & \textbf{Sample Input Query} & \textbf{Observed Diagnostic} \\
+        \midrule
+        Lexical Error & Stage 02 (Flex) & \texttt{SELECT @name FROM students;} & \texttt{[LEXICAL ERROR] Unrecognized character '@' at line 1, col 8} \\
+        Syntax Error & Stage 03 (Bison) & \texttt{SELECT FROM students;} & \texttt{[SYNTAX ERROR] unexpected 'FROM', expecting identifier} \\
+        Semantic Error & Stage 06 (Semantic) & \texttt{SELECT salary FROM students;} & \texttt{[SEMANTIC ERROR] Column 'salary' does not exist in table} \\
+        Type Error & Stage 06 (Semantic) & \texttt{SELECT name FROM students WHERE cgpa > 'Alice';} & \texttt{[TYPE ERROR] Incompatible types for '>': FLOAT and STRING} \\
+        Execution Error & Stage 09 (Executor) & Missing file or non-numeric data & \texttt{[EXECUTION ERROR] CSV file not found or parse failed} \\
+        \bottomrule
+    \end{tabularx}
+    \end{table}
+    \note{This taxonomy shows that our error isolation cleanly mirrors the theoretical separation of compiler phases.}
+\end{frame}
+
+% Slide 13: Website and Interface
+\begin{frame}{Interactive Web Visualizer Workbench}
+    \begin{columns}[T]
+        \begin{column}{0.48\textwidth}
+            \textbf{Visualizer Architecture (React 18 + Node.js)}
+            \begin{itemize}\footnotesize
+                \item \textbf{Frontend:} React 18, TypeScript, Tailwind CSS, Lucide icons, Vite 5 (Port 5173).
+                \item \textbf{Backend API Bridge:} Node.js Express server on port 3001 executing \texttt{minisql.exe --json}.
+                \item \textbf{Zero Simulated Data:} 100\% powered by the real C++ binary outputting structured JSON.
+                \item \textbf{Local Offline Execution:} Operates completely on localhost without cloud dependencies.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.48\textwidth}
+            \textbf{Interactive Demonstration Features}
+            \begin{itemize}\footnotesize
+                \item \textbf{10-Stage Pipeline Stepper:} Play, pause, step through, or reset to observe progressive compilation.
+                \item \textbf{Interactive Token Inspector:} Token type badges, raw lexemes, and line coordinates.
+                \item \textbf{Collapsible AST Tree:} Visual tree of clauses, operators, and literals.
+                \item \textbf{Side-by-Side IR Diff:} Canonical vs. Optimized plan comparison with rationale badges.
+                \item \textbf{Live Results \& Viva Guide:} Tabular CSV output and integrated oral defense revision cards.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+    \note{The web workbench acts as an interactive visual debugger, making compilation observable for viva review and classroom learning.}
+\end{frame}
+
+% Slide 14: Testing and Results
+\begin{frame}{Automated Testing \& Experimental Validation}
+    \textbf{PowerShell Test Suite Summary (\texttt{run\_tests.ps1}):} 26/26 Tests Passing (100\% Pass Rate).
+    \vspace{0.4em}
+    \begin{table}\footnotesize
+    \begin{tabularx}{\textwidth}{l l p{4.6cm} p{3.2cm} c}
+        \toprule
+        \textbf{Category} & \textbf{IDs} & \textbf{Scenario Description} & \textbf{Expected Behavior} & \textbf{Status} \\
+        \midrule
+        Valid Projections & T01, T02 & Single and multi-column selection & Projected columns match & PASS \\
+        Predicate Filters & T03, T04 & Float (\texttt{cgpa > 8.0}) \& Int (\texttt{age >= 20}) & Correct row filtration & PASS \\
+        Logical Predicates & T05, T06 & Compound boolean \texttt{AND} / \texttt{OR} & Precedence evaluation & PASS \\
+        Ordering \& Limits & T07--T09 & \texttt{ORDER BY}, \texttt{LIMIT}, combined & Sorting \& row count cap & PASS \\
+        Late Projection & T10, T11 & \texttt{ORDER BY} on unselected column & Projection reordering & PASS \\
+        Boundary Cases & T12--T14 & \texttt{LIMIT 0}, \texttt{LIMIT > rows}, no sort & Clean early stopping & PASS \\
+        Error Isolation & T17--T22 & Lexical, Syntax, Semantic, Type errors & Fail-stop stage isolation & PASS \\
+        API Bridge Output & T26 & \texttt{minisql.exe --json} bridge execution & Machine-readable JSON & PASS \\
+        \bottomrule
+    \end{tabularx}
+    \end{table}
+    \note{Every feature is backed by automated tests, verifying projections, comparisons, boolean logic, late projection, and error traps.}
+\end{frame}
+
+% Slide 15: Implementation Progress
+\begin{frame}{Module-Wise Implementation Progress Matrix}
+    \begin{table}\footnotesize
+    \begin{tabularx}{\textwidth}{l p{3.2cm} c c X}
+        \toprule
+        \textbf{Module / Subsystem} & \textbf{Technology / Source} & \textbf{Phase} & \textbf{Review 2 Status} & \textbf{Verification Evidence} \\
+        \midrule
+        Lexical Scanner & Flex (\texttt{lexer.l}) & Phase 1 & 100\% Complete & Token streaming \& error traps \\
+        Syntax Parser & Bison (\texttt{parser.y}) & Phase 1 & 100\% Complete & LALR(1) reduction test suite \\
+        AST Construction & C++17 (\texttt{ast.cpp}) & Phase 1 & 100\% Complete & ASCII print \& JSON export \\
+        Symbol Catalog & C++17 (\texttt{symbol\_table.cpp}) & Phase 1 & 100\% Complete & Schema metadata lookup \\
+        Semantic Analyzer & C++17 (\texttt{semantic\_analyzer.cpp}) & Phase 1 & 100\% Complete & 6-point semantic checklist \\
+        Relational IR & C++17 (\texttt{ir.cpp}) & Phase 2 & 100\% Complete & Canonical operator trees \\
+        Query Optimizer & C++17 (\texttt{optimizer.cpp}) & Phase 2 & 100\% Complete & Filter pushdown \& Late projection \\
+        CSV Executor & C++17 (\texttt{executor.cpp}) & Phase 2 & 100\% Complete & In-memory tuple execution \\
+        Fail-Stop Errors & Stage-specific traps & Phase 2 & 100\% Complete & Verified via T17--T25 tests \\
+        CLI JSON Bridge & \texttt{minisql.exe --json} & Phase 2/3 & 100\% Complete & Pure structured JSON output \\
+        Web Visualizer UI & React 18, TypeScript, Vite & Phase 3 & ~80\% Complete & Functional on port 5173 \\
+        Multi-Table Joins & Relational Join IR & Phase 3 & Pending & Reserved for Phase 3 extension \\
+        \bottomrule
+    \end{tabularx}
+    \end{table}
+    \note{All Phase 1 and Phase 2 modules are 100\% complete. Phase 3 web visualization is 80\% complete, with joins reserved for the final review.}
+\end{frame}
+
+% Slide 16: Review 2 Rubric Mapping
+\begin{frame}{Review 2 Assessment Rubric \& Evidence Mapping}
+    \textbf{Mapping Implementation Evidence to the Official Marking Criteria (25 Marks Total):}
+    \vspace{0.4em}
+    \begin{table}\footnotesize
+    \begin{tabularx}{\textwidth}{l c p{6.2cm} X}
+        \toprule
+        \textbf{Evaluation Criteria} & \textbf{Marks} & \textbf{Implemented Project Evidence} & \textbf{Review Status} \\
+        \midrule
+        Implementation Progress & 7 & Complete C++ pipeline (Lexer $\to$ Parser $\to$ AST $\to$ Semantic $\to$ IR $\to$ Optimizer $\to$ Executor) and web visualizer. & Demonstrated live \\
+        Technical Correctness & 5 & Verified LALR(1) grammar, AST construction, type-checking, and CSV query evaluation across 26 tests. & 26/26 Tests Passing \\
+        Compiler Concept Application & 4 & Application of DFAs, CFGs, AST traversal, symbol table lookup, IR operator trees, and algebraic rewrites. & Demonstrated across 10 stages \\
+        Code Quality \& Modularity & 3 & Modular C++17 header/source separation, clean OOP inheritance, proper memory cleanup, and typed React components. & Verified in repository \\
+        Testing \& Test Cases & 3 & Systematic test suite (\texttt{run\_tests.ps1}) testing projections, filters, logic, ordering, limits, and errors. & 100\% Automated pass \\
+        Individual Understanding & 3 & Deep grasp of compiler internals, data structures, relational algebra mappings, and oral viva readiness. & Prepared for oral viva \\
+        \bottomrule
+    \end{tabularx}
+    \end{table}
+    \note{We have mapped our deliverables directly to the 6 criteria in the official laboratory instruction manual.}
+\end{frame}
+
+% Slide 17: Related Work
+\begin{frame}{Related Academic Work in Compiler Education (2020--2025)}
+    \begin{table}\footnotesize
+    \begin{tabularx}{\textwidth}{l l p{4.6cm} X}
+        \toprule
+        \textbf{Authors \& Year} & \textbf{Venue / Journal} & \textbf{Key Findings \& Contribution} & \textbf{Comparison with SQLens} \\
+        \midrule
+        Stamenkovi\'c et al. (2020) & \textit{CAEE} (Wiley) & Evaluated 15 compiler simulation tools; identified lack of unified end-to-end visualization. & SQLens provides unified 10-stage pipeline with web visualization. \\
+        del Vado V\'irseda (2021) & \textit{ACM ITiCSE} & Proposed learning compiler design from implementation to theory using educational grammars. & SQLens applies implementation-first approach to relational SQL. \\
+        del Vado V\'irseda (2022) & \textit{ACM SIGCSE} & Developed ITT interactive tutoring tool for visualizing compiler theory from implementation. & SQLens extends tutoring to database query compilers and relational IR. \\
+        Hiranishi et al. (2022) & \textit{IEEJ Trans. EIS} & Built web-based visual compiler for computer education to visualize execution flow. & SQLens pairs web visualizer with a native compiled C++ core engine. \\
+        Stamenkovi\'c \& Jovanovi\'c (2024) & \textit{IEEE TLT} & Showed that web-based compiler systems significantly enhance student engagement. & SQLens confirms the efficacy of browser-accessible interactive compiler tools. \\
+        Koitz-Hristov et al. (2025) & \textit{ACM SIGCSE TS} & Introduced VisOpt for visualizing compiler optimization passes in CS education. & SQLens specifically focuses on relational query optimization passes. \\
+        \bottomrule
+    \end{tabularx}
+    \end{table}
+    \note{Literature from 2020 to 2025 demonstrates the pedagogical efficacy of interactive compiler visualization tools.}
+\end{frame}
+
+% Slide 18: Project-Specific Contribution
+\begin{frame}{What Distinguishes SQLens? An Honest Assessment}
+    \begin{columns}[T]
+        \begin{column}{0.48\textwidth}
+            \textbf{What SQLens Does NOT Claim}
+            \begin{itemize}\small
+                \item \textbf{Not a Novel Invention:} Visual compiler simulators and educational tools have been explored since the early 2000s; visualization itself is not a new research discovery.
+                \item \textbf{Not a Production Database:} SQLens does not attempt to replace production engines like PostgreSQL, DuckDB, or SQLite.
+                \item \textbf{Not a Speed Benchmark:} MiniSQL is designed for maximum clarity, explainability, and pedagogical inspection, not high-throughput parallel execution.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.48\textwidth}
+            \textbf{Genuine Engineering Contributions}
+            \begin{itemize}\small
+                \item \textbf{Cross-Disciplinary Synthesis:} Bridges Compiler Design (Flex/Bison) with DBMS query engine internals (Relational IR, Optimization, CSV Execution).
+                \item \textbf{Zero-Mock Native Architecture:} The web visualizer is 100\% driven by real C++ compiled binary outputs emitted via structured JSON.
+                \item \textbf{Fail-Stop Diagnostic Isolation:} Clearly reveals where queries fail (Lexical vs. Syntax vs. Semantic vs. Runtime).
+                \item \textbf{Algebraic Plan Equivalence:} Side-by-side inspection of Canonical vs. Optimized relational algebra trees.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+    \note{We provide an honest academic assessment: our contribution is in engineering a unified, zero-mock bridge between compilers and DBMS.}
+\end{frame}
+
+% Slide 19: Future Work & Research Potential
+\begin{frame}{Future Work \& Computing Education Research Potential}
+    \begin{columns}[T]
+        \begin{column}{0.48\textwidth}
+            \textbf{Engineering Roadmap (Phase 3 Extensions)}
+            \begin{itemize}\footnotesize
+                \item \textbf{Multi-Table Joins:} Implementing Nested Loop Joins and Hash Join relational operators.
+                \item \textbf{Aggregations:} Adding \texttt{COUNT()}, \texttt{SUM()}, \texttt{AVG()}, and \texttt{GROUP BY} / \texttt{HAVING} clauses.
+                \item \textbf{Additional Optimizer Rules:} Constant folding in WHERE predicates and dead attribute elimination.
+                \item \textbf{Execution Stepping Animation:} Highlighting qualifying vs. pruned rows visually during CSV streaming.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.48\textwidth}
+            \textbf{Research Potential (ACM SIGCSE Venue)}
+            \begin{itemize}\footnotesize
+                \item \textbf{Target Venue:} ACM Technical Symposium on Computer Science Education (SIGCSE).
+                \item \textbf{Research Question:} \textit{“Does an integrated, stage-by-stage visualization of a real SQL compiler improve undergraduate students' conceptual understanding and debugging accuracy compared to traditional instruction?”}
+                \item \textbf{Prerequisite:} Rigorous empirical classroom evaluation with human student participants is required before submission.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+    \note{For Phase 3 we plan multi-table joins and aggregations, and we outline a formal classroom study required for SIGCSE research.}
+\end{frame}
+
+% Slide 20: Conclusion & Demonstration Plan
+\begin{frame}{Conclusion \& Live Review Demonstration Plan}
+    \begin{columns}[T]
+        \begin{column}{0.48\textwidth}
+            \textbf{Review 2 Summary of Achievements}
+            \begin{itemize}\footnotesize
+                \item Fully working MiniSQL compiler built with Flex, Bison, and C++17.
+                \item 10-stage compilation pipeline from source SQL to physical CSV execution.
+                \item Strict fail-stop error isolation across lexical, syntax, semantic, and runtime categories.
+                \item 26/26 automated tests passing with 100\% success rate.
+                \item Interactive React web visualizer connected via Node.js Express bridge.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.48\textwidth}
+            \textbf{Live Review Demonstration Sequence}
+            \begin{enumerate}\footnotesize
+                \item \textbf{Grand Tour Query:} Run \texttt{SELECT name, age FROM students WHERE age >= 20 ORDER BY cgpa LIMIT 3;} to demonstrate all 10 stages.
+                \item \textbf{Optimization Inspection:} Compare Canonical vs. Optimized IR plan and inspect Late Projection.
+                \item \textbf{Semantic Fail-Stop:} Execute \texttt{SELECT salary FROM students;} (halted at Stage 06).
+                \item \textbf{Lexical Error Isolation:} Execute \texttt{SELECT @name FROM students;} (halted at Stage 02).
+                \item \textbf{Automated Test Suite:} Execute \texttt{.\\run\_tests.ps1} in PowerShell (26/26 passing).
+            \end{enumerate}
+        \end{column}
+    \end{columns}
+    \note{In conclusion, all Review 2 requirements are fully met. I will now proceed to the live demonstration following our 5-step sequence.}
+\end{frame}
+
+% Slide 21: References
+\begin{frame}{Academic References \& Project Bibliography}
+    \begin{columns}[T]
+        \begin{column}{0.48\textwidth}
+            \begin{itemize}\tiny
+                \item \textbf{[1] Stamenkovi\'c, D., et al. (2020).} Evaluation of simulation systems suitable for teaching compiler construction courses. \textit{CAEE}, 28(5), 1160--1177. DOI: 10.1002/cae.22231
+                \item \textbf{[2] del Vado V\'irseda, R. (2021).} Learning Compiler Design: From the Implementation to Theory. In \textit{Proc. ACM ITiCSE 2021}, pp. 282--288. DOI: 10.1145/3456565.3460041
+                \item \textbf{[3] del Vado V\'irseda, R. (2022).} ITT: An Interactive Tutoring Tool. In \textit{Proc. ACM SIGCSE 2022}, pp. 696--702. DOI: 10.1145/3478432.3499140
+                \item \textbf{[4] Hiranishi, Y., et al. (2022).} Application of Web-based Visual Compiler to Computer Education. \textit{IEEJ Trans. EIS}, 142(4), 389--396.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.48\textwidth}
+            \begin{itemize}\tiny
+                \item \textbf{[5] Stamenkovi\'c, D., \& Jovanovi\'c, Z. (2024).} A Web-Based Educational System for Teaching Compilers. \textit{IEEE TLT}, 17, 819--830. DOI: 10.1109/TLT.2023.3297626
+                \item \textbf{[6] Koitz-Hristov, R., et al. (2025).} VisOpt -- Visualization of Compiler Optimizations for CS Education. In \textit{Proc. ACM SIGCSE TS 2025}.
+                \item \textbf{[7] VIT SCOPE (2026).} Compiler Design Laboratory Project Instruction Manual (BCSE307P), VIT Vellore.
+                \item \textbf{[8] Aho, A. V., et al. (2006).} Compilers: Principles, Techniques, and Tools (2nd ed.). Addison-Wesley.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+    \note{Thank you for your time. I am now open to questions from the faculty evaluator.}
+\end{frame}
+
+\end{document}

@@ -74,3 +74,25 @@ void SymbolTable::printSymbolTable() const {
         }
     }
 }
+
+std::string SymbolTable::toJson() const {
+    std::string json = "{\"tables\":[";
+    for (size_t t = 0; t < tableOrder.size(); ++t) {
+        const std::string& tableName = tableOrder[t];
+        json += "{\"name\":\"" + tableName + "\",\"columns\":[";
+        auto orderIt = columnOrder.find(tableName);
+        if (orderIt != columnOrder.end()) {
+            for (size_t c = 0; c < orderIt->second.size(); ++c) {
+                const auto& col = orderIt->second[c];
+                std::string colType = getColumnType(tableName, col);
+                json += "{\"name\":\"" + col + "\",\"type\":\"" + colType + "\"}";
+                if (c + 1 < orderIt->second.size()) json += ",";
+            }
+        }
+        json += "]}";
+        if (t + 1 < tableOrder.size()) json += ",";
+    }
+    json += "]}";
+    return json;
+}
+

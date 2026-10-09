@@ -13,10 +13,18 @@
   #define strdup my_strdup
 #endif
 
+struct TokenRecord {
+    std::string token;
+    std::string lexeme;
+    std::string type;
+    int line;
+};
+
 bool g_print_tokens = false;
 bool g_lexical_error = false;
 std::string g_lexical_error_msg = "";
 std::vector<std::string> g_recorded_tokens;
+std::vector<TokenRecord> g_detailed_tokens;
 
 // Helper to record token stream and return token code to Bison
 static int emit(int token_id, const char* token_label) {
@@ -31,6 +39,10 @@ static int emit(int token_id, const char* token_label) {
         repr = "COMMA";
     } else if (strcmp(token_label, "SEMICOLON") == 0) {
         repr = "SEMICOLON";
+    } else if (strcmp(token_label, "LPAREN") == 0) {
+        repr = "LPAREN";
+    } else if (strcmp(token_label, "RPAREN") == 0) {
+        repr = "RPAREN";
     } else if (strcmp(token_label, "EQUALS") == 0) {
         repr = "EQUALS";
     } else if (strcmp(token_label, "NOT_EQUALS") == 0) {
@@ -58,6 +70,14 @@ static int emit(int token_id, const char* token_label) {
     }
 
     g_recorded_tokens.push_back(repr);
+
+    TokenRecord rec;
+    rec.token = repr;
+    rec.lexeme = text;
+    rec.type = token_label;
+    rec.line = yylineno;
+    g_detailed_tokens.push_back(rec);
+
     if (g_print_tokens) {
         std::cout << repr << "\n";
     }
@@ -90,6 +110,8 @@ STRING_LITERAL   \'([^'\\]|\\.)*\'|\"([^"\\]|\\.)*\"
 "WHERE"          { return emit(TOKEN_WHERE, "KEYWORD"); }
 "ORDER"          { return emit(TOKEN_ORDER, "KEYWORD"); }
 "BY"             { return emit(TOKEN_BY, "KEYWORD"); }
+"ASC"            { return emit(TOKEN_ASC, "KEYWORD"); }
+"DESC"           { return emit(TOKEN_DESC, "KEYWORD"); }
 "LIMIT"          { return emit(TOKEN_LIMIT, "KEYWORD"); }
 "AND"            { return emit(TOKEN_AND, "KEYWORD"); }
 "OR"             { return emit(TOKEN_OR, "KEYWORD"); }
@@ -105,6 +127,8 @@ STRING_LITERAL   \'([^'\\]|\\.)*\'|\"([^"\\]|\\.)*\"
 
 ","              { return emit(TOKEN_COMMA, "COMMA"); }
 ";"              { return emit(TOKEN_SEMICOLON, "SEMICOLON"); }
+"("              { return emit(TOKEN_LPAREN, "LPAREN"); }
+")"              { return emit(TOKEN_RPAREN, "RPAREN"); }
 
 "="              { return emit(TOKEN_EQ, "EQUALS"); }
 "!="             { return emit(TOKEN_NEQ, "NOT_EQUALS"); }
@@ -163,4 +187,5 @@ void clear_lexer_state() {
     g_lexical_error = false;
     g_lexical_error_msg.clear();
     g_recorded_tokens.clear();
+    g_detailed_tokens.clear();
 }

@@ -2,8 +2,16 @@
 #define SEMANTIC_ANALYZER_H
 
 #include <string>
+#include <vector>
 #include "ast.h"
 #include "symbol_table.h"
+
+struct SemanticCheckItem {
+    std::string check;     // e.g. "Table existence", "Column existence", "Type check"
+    std::string entity;    // e.g. "students", "name", "cgpa > 8.0"
+    bool passed;
+    std::string message;
+};
 
 /**
  * @brief Semantic Analyzer for MiniSQL.
@@ -19,6 +27,9 @@ private:
     const SymbolTable& symbolTable;
     std::string currentTable;
     std::string errorMessage;
+    std::string errorCategory; // "SEMANTIC ERROR" or "TYPE ERROR"
+    std::vector<SemanticCheckItem> checklist;
+    bool verbose = false;
 
     // Recursively infers the type of an expression and checks semantic validity
     std::string inferAndCheckExpr(const ExprNode* expr);
@@ -28,12 +39,22 @@ private:
 
 public:
     explicit SemanticAnalyzer(const SymbolTable& symTable);
+    void setVerbose(bool v) { verbose = v; }
 
     // Analyzes a parsed SELECT query AST. Returns true if valid, false on error.
     bool analyze(const SelectQueryNode* query);
 
     // Returns the descriptive error message if analyze() returned false.
     const std::string& getErrorMessage() const;
+
+    // Returns the error category ("SEMANTIC ERROR" or "TYPE ERROR")
+    const std::string& getErrorCategory() const;
+
+    // Returns the structured verification checklist for educational display
+    const std::vector<SemanticCheckItem>& getChecklist() const { return checklist; }
+
+    // Returns JSON representation for web visualizer
+    std::string toJson() const;
 };
 
 #endif // SEMANTIC_ANALYZER_H

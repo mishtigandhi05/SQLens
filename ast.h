@@ -30,6 +30,9 @@ public:
     
     // Prints the node and its subtrees with ASCII tree branches
     virtual void print(const std::string& prefix = "", bool isLast = true) const = 0;
+
+    // Serializes node to JSON string for web visualizer
+    virtual std::string toJson() const = 0;
 };
 
 /**
@@ -38,6 +41,8 @@ public:
 class ExprNode : public ASTNode {
 public:
     virtual ~ExprNode() = default;
+    virtual ExprNode* clone() const = 0;
+    virtual std::string toString() const = 0;
 };
 
 /**
@@ -53,6 +58,9 @@ public:
     ~BinaryOpNode() override;
 
     void print(const std::string& prefix = "", bool isLast = true) const override;
+    ExprNode* clone() const override;
+    std::string toString() const override;
+    std::string toJson() const override;
 };
 
 /**
@@ -64,6 +72,9 @@ public:
 
     explicit ColumnRefNode(const std::string& name);
     void print(const std::string& prefix = "", bool isLast = true) const override;
+    ExprNode* clone() const override;
+    std::string toString() const override;
+    std::string toJson() const override;
 };
 
 /**
@@ -76,6 +87,9 @@ public:
 
     LiteralNode(const std::string& value, const std::string& type);
     void print(const std::string& prefix = "", bool isLast = true) const override;
+    ExprNode* clone() const override;
+    std::string toString() const override;
+    std::string toJson() const override;
 };
 
 /**
@@ -87,16 +101,19 @@ public:
     std::string tableName;
     ExprNode* whereClause;
     std::string orderByColumn;
+    bool orderByAscending;
     int limitValue; // -1 if LIMIT is not present
 
     SelectQueryNode(const std::vector<std::string>& cols,
                     const std::string& table,
                     ExprNode* whereExpr = nullptr,
                     const std::string& orderBy = "",
+                    bool orderAsc = true,
                     int limit = -1);
     ~SelectQueryNode() override;
 
     void print(const std::string& prefix = "", bool isLast = true) const override;
+    std::string toJson() const override;
 };
 
 // Global root pointer populated by Bison parser

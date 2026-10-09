@@ -49,9 +49,10 @@ extern int yydebug;
 
     #include <string>
     #include <vector>
+    #include <utility>
     #include "ast.h"
 
-#line 55 "parser.tab.hpp"
+#line 56 "parser.tab.hpp"
 
 /* Token kinds.  */
 #ifndef YYTOKENTYPE
@@ -67,23 +68,27 @@ extern int yydebug;
     TOKEN_WHERE = 260,             /* "'WHERE'"  */
     TOKEN_ORDER = 261,             /* "'ORDER'"  */
     TOKEN_BY = 262,                /* "'BY'"  */
-    TOKEN_LIMIT = 263,             /* "'LIMIT'"  */
-    TOKEN_AND = 264,               /* "'AND'"  */
-    TOKEN_OR = 265,                /* "'OR'"  */
-    TOKEN_COMMA = 266,             /* "','"  */
-    TOKEN_SEMICOLON = 267,         /* "';'"  */
-    TOKEN_EQ = 268,                /* "'='"  */
-    TOKEN_NEQ = 269,               /* "'!='"  */
-    TOKEN_LT = 270,                /* "'<'"  */
-    TOKEN_GT = 271,                /* "'>'"  */
-    TOKEN_LTE = 272,               /* "'<='"  */
-    TOKEN_GTE = 273,               /* "'>='"  */
-    TOKEN_IDENTIFIER = 274,        /* "identifier"  */
-    TOKEN_INT = 275,               /* "integer literal"  */
-    TOKEN_FLOAT = 276,             /* "number literal"  */
-    TOKEN_STRING = 277,            /* "string literal"  */
-    TOKEN_BOOL = 278,              /* "boolean literal"  */
-    TOKEN_INVALID = 279            /* "invalid character"  */
+    TOKEN_ASC = 263,               /* "'ASC'"  */
+    TOKEN_DESC = 264,              /* "'DESC'"  */
+    TOKEN_LIMIT = 265,             /* "'LIMIT'"  */
+    TOKEN_AND = 266,               /* "'AND'"  */
+    TOKEN_OR = 267,                /* "'OR'"  */
+    TOKEN_COMMA = 268,             /* "','"  */
+    TOKEN_SEMICOLON = 269,         /* "';'"  */
+    TOKEN_LPAREN = 270,            /* "'('"  */
+    TOKEN_RPAREN = 271,            /* "')'"  */
+    TOKEN_EQ = 272,                /* "'='"  */
+    TOKEN_NEQ = 273,               /* "'!='"  */
+    TOKEN_LT = 274,                /* "'<'"  */
+    TOKEN_GT = 275,                /* "'>'"  */
+    TOKEN_LTE = 276,               /* "'<='"  */
+    TOKEN_GTE = 277,               /* "'>='"  */
+    TOKEN_IDENTIFIER = 278,        /* "identifier"  */
+    TOKEN_INT = 279,               /* "integer literal"  */
+    TOKEN_FLOAT = 280,             /* "number literal"  */
+    TOKEN_STRING = 281,            /* "string literal"  */
+    TOKEN_BOOL = 282,              /* "boolean literal"  */
+    TOKEN_INVALID = 283            /* "invalid character"  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -92,15 +97,16 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 31 "parser.y"
+#line 32 "parser.y"
 
     int int_val;
     char* str_val;
     ExprNode* expr_val;
     std::vector<std::string>* str_list_val;
     SelectQueryNode* query_val;
+    std::pair<std::string, bool>* order_by_val;
 
-#line 104 "parser.tab.hpp"
+#line 110 "parser.tab.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;

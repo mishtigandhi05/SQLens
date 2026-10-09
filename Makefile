@@ -25,8 +25,11 @@ parser.tab.cpp parser.tab.hpp: parser.y ast.h
 lex.yy.cpp: lexer.l parser.tab.hpp ast.h
 	$(FLEX) -o lex.yy.cpp lexer.l
 
-$(TARGET): main.cpp ast.cpp symbol_table.cpp semantic_analyzer.cpp parser.tab.cpp lex.yy.cpp ast.h symbol_table.h semantic_analyzer.h
-	$(CXX) $(CXXFLAGS) -o $(TARGET) main.cpp ast.cpp symbol_table.cpp semantic_analyzer.cpp parser.tab.cpp lex.yy.cpp
+SRCS = main.cpp ast.cpp symbol_table.cpp semantic_analyzer.cpp ir.cpp optimizer.cpp executor.cpp parser.tab.cpp lex.yy.cpp
+HEADERS = ast.h symbol_table.h semantic_analyzer.h ir.h optimizer.h executor.h parser.tab.hpp
+
+$(TARGET): $(SRCS) $(HEADERS)
+	$(CXX) $(CXXFLAGS) -o $(TARGET) $(SRCS)
 
 clean:
 	$(RM) parser.tab.cpp parser.tab.hpp lex.yy.cpp $(TARGET) $(NULL_DEV)

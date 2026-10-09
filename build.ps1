@@ -60,7 +60,7 @@ Write-Host "[2/3] Generating lexer from lexer.l..." -ForegroundColor Yellow
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 Write-Host "[3/3] Compiling C++ sources..." -ForegroundColor Yellow
-& $gppPath -std=c++17 -Wall -Wextra -o minisql.exe main.cpp ast.cpp symbol_table.cpp semantic_analyzer.cpp parser.tab.cpp lex.yy.cpp
+& $gppPath -std=c++17 -Wall -Wextra -o minisql.exe main.cpp ast.cpp symbol_table.cpp semantic_analyzer.cpp ir.cpp optimizer.cpp executor.cpp parser.tab.cpp lex.yy.cpp
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 Write-Host "`nBuild successful! Generated minisql.exe" -ForegroundColor Green

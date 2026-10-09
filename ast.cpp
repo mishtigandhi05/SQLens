@@ -35,6 +35,45 @@ void BinaryOpNode::print(const std::string& prefix, bool isLast) const {
     }
 }
 
+ExprNode* BinaryOpNode::clone() const {
+    return new BinaryOpNode(op, left ? left->clone() : nullptr, right ? right->clone() : nullptr);
+}
+
+std::string BinaryOpNode::toString() const {
+    std::string lStr = left ? left->toString() : "";
+    std::string rStr = right ? right->toString() : "";
+    return lStr + " " + op + " " + rStr;
+}
+
+static std::string escapeJson(const std::string& s) {
+    std::string out;
+    for (char c : s) {
+        if (c == '"') out += "\\\"";
+        else if (c == '\\') out += "\\\\";
+        else if (c == '\n') out += "\\n";
+        else if (c == '\r') out += "\\r";
+        else if (c == '\t') out += "\\t";
+        else out += c;
+    }
+    return out;
+}
+
+std::string BinaryOpNode::toJson() const {
+    std::string json = "{\"type\":\"BinaryOp\",\"op\":\"" + escapeJson(op) + "\"";
+    if (left) {
+        json += ",\"left\":" + left->toJson();
+    } else {
+        json += ",\"left\":null";
+    }
+    if (right) {
+        json += ",\"right\":" + right->toJson();
+    } else {
+        json += ",\"right\":null";
+    }
+    json += "}";
+    return json;
+}
+
 // ==========================================
 // ColumnRefNode
 // ==========================================
@@ -42,6 +81,18 @@ ColumnRefNode::ColumnRefNode(const std::string& name) : name(name) {}
 
 void ColumnRefNode::print(const std::string& prefix, bool isLast) const {
     std::cout << prefix << (isLast ? "`-- " : "|-- ") << name << "\n";
+}
+
+ExprNode* ColumnRefNode::clone() const {
+    return new ColumnRefNode(name);
+}
+
+std::string ColumnRefNode::toString() const {
+    return name;
+}
+
+std::string ColumnRefNode::toJson() const {
+    return "{\"type\":\"ColumnRef\",\"name\":\"" + escapeJson(name) + "\"}";
 }
 
 // ==========================================
@@ -54,6 +105,21 @@ void LiteralNode::print(const std::string& prefix, bool isLast) const {
     std::cout << prefix << (isLast ? "`-- " : "|-- ") << value << "\n";
 }
 
+ExprNode* LiteralNode::clone() const {
+    return new LiteralNode(value, type);
+}
+
+std::string LiteralNode::toString() const {
+    if (type == "STRING") {
+        return "'" + value + "'";
+    }
+    return value;
+}
+
+std::string LiteralNode::toJson() const {
+    return "{\"type\":\"Literal\",\"value\":\"" + escapeJson(value) + "\",\"literalType\":\"" + escapeJson(type) + "\"}";
+}
+
 // ==========================================
 // SelectQueryNode
 // ==========================================
@@ -61,9 +127,10 @@ SelectQueryNode::SelectQueryNode(const std::vector<std::string>& cols,
                                  const std::string& table,
                                  ExprNode* whereExpr,
                                  const std::string& orderBy,
+                                 bool orderAsc,
                                  int limit)
     : columns(cols), tableName(table), whereClause(whereExpr),
-      orderByColumn(orderBy), limitValue(limit) {}
+      orderByColumn(orderBy), orderByAscending(orderAsc), limitValue(limit) {}
 
 SelectQueryNode::~SelectQueryNode() {
     delete whereClause;
@@ -108,7 +175,7 @@ void SelectQueryNode::print(const std::string& prefix, bool isLast) const {
         bool orderIsLast = (!hasLimit);
         std::cout << (orderIsLast ? "`-- " : "|-- ") << "ORDER BY\n";
         std::string orderPrefix = (orderIsLast ? "    " : "|   ");
-        std::cout << orderPrefix << "`-- " << orderByColumn << "\n";
+        std::cout << orderPrefix << "`-- " << orderByColumn << (orderByAscending ? " ASC" : " DESC") << "\n";
     }
 
     // Section 5: LIMIT (optional)
@@ -116,4 +183,27 @@ void SelectQueryNode::print(const std::string& prefix, bool isLast) const {
         std::cout << "`-- LIMIT\n";
         std::cout << "    `-- " << limitValue << "\n";
     }
+}
+
+std::string SelectQueryNode::toJson() const {
+    std::string json = "{\"type\":\"SelectQuery\",\"table\":\"" + escapeJson(tableName) + "\",\"columns\":[";
+    for (size_t i = 0; i < columns.size(); ++i) {
+        json += "\"" + escapeJson(columns[i]) + "\"";
+        if (i + 1 < columns.size()) json += ",";
+    }
+    json += "]";
+    if (whereClause) {
+        json += ",\"where\":" + whereClause->toJson();
+    } else {
+        json += ",\"where\":null";
+    }
+    if (!orderByColumn.empty()) {
+        json += ",\"orderBy\":\"" + escapeJson(orderByColumn) + "\"";
+        json += ",\"orderAsc\":" + std::string(orderByAscending ? "true" : "false");
+    } else {
+        json += ",\"orderBy\":null,\"orderAsc\":true";
+    }
+    json += ",\"limit\":" + std::to_string(limitValue);
+    json += "}";
+    return json;
 }

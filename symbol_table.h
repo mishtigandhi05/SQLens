@@ -64,6 +64,9 @@ public:
 
     // Convenience alias matching AST coding style
     void print() const { printSymbolTable(); }
+
+    // Returns JSON representation of the schema for the web visualizer
+    std::string toJson() const;
 };
 
 #endif // SYMBOL_TABLE_H
